@@ -1,0 +1,8 @@
+node_modules
+.cache
+app.js
+.github
+newIndex.js
+.github
+pnpm-lock.yaml
+.env

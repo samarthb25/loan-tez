@@ -1,0 +1,40 @@
+definitions:
+  securitySchemes:
+    tokenauth:
+      type: basic
+      description: bearer auth
+      name: Authorization
+      in: header
+    demouser:
+      type: basic
+
+  adminLogin:
+    required:
+      - identifier
+      - password
+    properties:
+      identifier:
+        type: string
+      password:
+        type: string
+    example:
+      identifier: "codestrupinfotech@gmail.com"
+      password: "Codestrup@2024@"
+  
+  addAdmin:
+    required:
+      - name
+      - password
+      - email
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      email:
+        type: string
+    example:
+      name: " "
+      password: " "
+      email: " "
+  
