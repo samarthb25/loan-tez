@@ -47,7 +47,7 @@ export const SuperAdminLogin = async (req, res) => {
     if (!identifier || !password) {
       return res
         .status(400)
-        .json({ statusCode: 400, message: "All fields are required" });
+        .json(errorResponse(400, "All fields are required"));
     }
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
@@ -61,37 +61,36 @@ export const SuperAdminLogin = async (req, res) => {
     });
 
     if (!superAdmin) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: "Email/Phone or password is incorrect",
-      });
+      return res
+        .status(400)
+        .json(errorResponse(400, "Email/Phone or password is incorrect"));
     }
     if (superAdmin.status === "block") {
-      return res.status(400).json({
-        statusCode: 400,
-        message: "Your account is blocked. Please contact support.",
-      });
+      return res
+        .status(400)
+        .json(
+          errorResponse(400, "Your account is blocked. Please contact support.")
+        );
     }
     const isPasswordValid = await bcrypt.compare(password, superAdmin.password);
 
     if (!isPasswordValid) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: "Email/Phone or password is incorrect",
-      });
+      return res
+        .status(400)
+        .json(errorResponse(400, "Email/Phone or password is incorrect"));
     }
     const token = jwt.sign({ userId: superAdmin._id }, ACCESS_TOKEN_SECRET, {
       expiresIn: "1h",
     });
 
-    res.status(200).json({
-      statusCode: 200,
-      message: "Login successful",
-      token,
-    });
+    res.status(200).json(
+      successResponse(200, "Login successful", {
+        token,
+      })
+    );
   } catch (error) {
     console.error("Error logging in super admin:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res.status(500).json(errorResponse(500, error.message, error));
   }
 };
 
@@ -170,7 +169,7 @@ export const AdminCreate = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ statusCode: 400, message: "Email is already in use." });
+        .json(errorResponse(400, "Email is already in use."));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -282,14 +281,14 @@ export const AdminCreate = async (req, res) => {
     });
 
     await newAdmin.save();
-    res.status(200).json({
-      statusCode: 200,
-      message: "Admin created successfully.",
-      newAdmin,
-    });
+    res
+      .status(200)
+      .json(errorResponse(200, "Admin created successfully.", newAdmin));
   } catch (error) {
     console.error("Error creating SellPerson:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res
+      .status(500)
+      .json(errorResponse(500, "Internal Server Error", error.message));
   }
 };
 
