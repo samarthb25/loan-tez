@@ -321,23 +321,15 @@ export const getProfile = async (req, res) => {
   try {
     const admin = await UserModel.findById(req.userId).select("-password");
     if (!admin) {
-      return res.status(404).json({
-        statusCode: 404,
-        message: "Admin not found",
-      });
+      return res.status(404).json(errorResponse(404, "Admin not found"));
     }
 
-    res.status(200).json({
-      statusCode: 200,
-      message: "Admin fetched successfully",
-      data: admin,
-    });
+    res
+      .status(200)
+      .json(successResponse(200, "Admin successfully retrived", admin));
   } catch (error) {
     console.error("Error fetching admin profile:", error);
-    res.status(500).json({
-      statusCode: 500,
-      message: "Internal Server Error",
-    });
+    res.status(500).json(errorResponse(500, error.message));
   }
 };
 
@@ -431,9 +423,7 @@ export const getAllAdmins = async (req, res) => {
     const totalPages = Math.ceil(totalAdmins / limit);
 
     if (admins.length === 0) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "No admins found." });
+      return res.status(404).json(errorResponse(404, "No admins found."));
     }
 
     res.status(200).json({
@@ -449,7 +439,7 @@ export const getAllAdmins = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching admins:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res.status(500).json(errorResponse(500, "Internal Server Error"));
   }
 };
 
@@ -492,17 +482,13 @@ export const deleteAdmin = async (req, res) => {
       role: "Admin",
     });
     if (!adminToDelete) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "Admin not found." });
+      return res.status(404).json(errorResponse(404, "Admin not found."));
     }
 
-    res
-      .status(200)
-      .json({ statusCode: 200, message: "Admin deleted successfully." });
+    res.status(200).json(successResponse(200, "Admin deleted successfully."));
   } catch (error) {
     console.error("Error deleting admin:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res.status(500).json(errorResponse(500, "Error deleting admin"));
   }
 };
 
@@ -545,17 +531,15 @@ export const getAdmin = async (req, res) => {
       role: { $in: ["Admin"] },
     });
     if (!admin) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "Admin not found." });
+      return res.status(404).json(errorResponse(404, "Admin not found."));
     }
 
     res
       .status(200)
-      .json({ statusCode: 200, message: "Admin get successfully.", admin });
+      .json(successResponse(200, "Admin get successfully.", admin));
   } catch (error) {
     console.error("Error deleting admin:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res.status(500).json(errorResponse(500, "Error deleting admin:", error));
   }
 };
 
@@ -622,7 +606,7 @@ export const updateAdmin = async (req, res) => {
     if (Object.keys(otherFields).length === 0 && !password) {
       return res
         .status(400)
-        .json({ statusCode: 400, message: "No fields provided for update." });
+        .json(errorResponse(400, "No fields provided for update."));
     }
 
     let updatedFields = { ...otherFields };
@@ -638,19 +622,17 @@ export const updateAdmin = async (req, res) => {
     });
 
     if (!updatedAdmin) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "Admin not found." });
+      return res.status(404).json(errorResponse(404, "Admin not found."));
     }
 
-    res.status(200).json({
-      statusCode: 200,
-      message: "Admin updated successfully.",
-      updatedAdmin,
-    });
+    res
+      .status(200)
+      .json(successResponse(200, "Admin updated successfully.", updatedAdmin));
   } catch (error) {
     console.error("Error updating admin:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res
+      .status(500)
+      .json(errorResponse(500, "Error updating admin", error.message));
   }
 };
 
@@ -803,7 +785,7 @@ export const salesPersonCreate = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ statusCode: 400, message: "Email is already in use." });
+        .json(errorResponse(400, "Email is already in use."));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -820,13 +802,15 @@ export const salesPersonCreate = async (req, res) => {
 
     await newAdmin.save();
 
-    res.status(200).json({
-      statusCode: 200,
-      message: "sales person created successfully.",
-      admin: newAdmin,
-    });
+    res
+      .status(200)
+      .json(
+        successResponse(200, "sales person created successfully.", newAdmin)
+      );
   } catch (error) {
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res
+      .status(500)
+      .json(errorResponse(500, "error creating sales person", error));
   }
 };
 
@@ -921,9 +905,7 @@ export const getAllSalesperson = async (req, res) => {
     const totalPages = Math.ceil(totalAdmins / limit);
 
     if (admins.length === 0) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "No Sales person found." });
+      return res.status(404).json(errorResponse(404, "No Sales person found."));
     }
 
     res.status(200).json({
@@ -939,7 +921,11 @@ export const getAllSalesperson = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching admins:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res
+      .status(500)
+      .json(
+        errorResponse(500, "Error fetching all sales person", error.message)
+      );
   }
 };
 
@@ -1029,10 +1015,7 @@ export const updateSalesPerson = async (req, res) => {
     const updateData = req.body;
     const salesperson = await UserModel.findById(id);
     if (!salesperson) {
-      return res.status(404).json({
-        statusCode: 404,
-        message: "Salesperson not found.",
-      });
+      return res.status(404).json(errorResponse(404, "Salesperson not found."));
     }
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
@@ -1043,17 +1026,20 @@ export const updateSalesPerson = async (req, res) => {
       { new: true }
     ).select("-password");
 
-    res.status(200).json({
-      statusCode: 200,
-      message: "Salesperson updated successfully.",
-      data: updatedSalesperson,
-    });
+    res
+      .status(200)
+      .json(
+        successResponse(
+          200,
+          "Salesperson updated successfully.",
+          updatedSalesperson
+        )
+      );
   } catch (error) {
     console.error("Error updating salesperson:", error);
-    res.status(500).json({
-      statusCode: 500,
-      message: "Internal Server Error",
-    });
+    res
+      .status(500)
+      .json(errorResponse(500, "Error updating salesperson", error.message));
   }
 };
 
@@ -1096,17 +1082,15 @@ export const deleteSalesPerson = async (req, res) => {
       role: "Salesperson",
     });
     if (!adminToDelete) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "Salesperson not found." });
+      return res.status(404).json(errorResponse(404, "Salesperson not found."));
     }
 
     res
       .status(200)
-      .json({ statusCode: 200, message: "Salesperson deleted successfully." });
+      .json(successResponse(200, "Salesperson deleted successfully."));
   } catch (error) {
     console.error("Error deleting Salesperson:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res.status(500).json(errorResponse(500, "Error deleting Salesperson"));
   }
 };
 
@@ -1149,19 +1133,15 @@ export const getSalesPerson = async (req, res) => {
       role: { $in: ["Salesperson"] },
     });
     if (!admin) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: "Salesperson not found." });
+      return res.status(404).json(errorResponse(404, "Salesperson not found."));
     }
 
-    res.status(200).json({
-      statusCode: 200,
-      message: "Salesperson get successfully.",
-      admin,
-    });
+    res
+      .status(200)
+      .json(successResponse(200, "Salesperson get successfully.", admin));
   } catch (error) {
     console.error("Error deleting Salesperson:", error);
-    res.status(500).json({ statusCode: 500, error: "Internal Server Error" });
+    res.status(500).json(errorResponse(500, "error getting Salesperson"));
   }
 };
 
@@ -1204,10 +1184,7 @@ export const blockUnblock = async (req, res) => {
       role: { $in: ["Salesperson", "Admin"] },
     });
     if (!salesperson) {
-      return res.status(404).json({
-        statusCode: 404,
-        message: "Salesperson not found",
-      });
+      return res.status(404).json(errorResponse(404, "Salesperson not found"));
     }
     if (salesperson.status === "block") {
       salesperson.status = "unblock";
@@ -1226,10 +1203,9 @@ export const blockUnblock = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      error: "Internal Server Error",
-    });
+    res
+      .status(500)
+      .json(errorResponse(500, "Error blocking and unblocking", error.message));
   }
 };
 
@@ -1262,10 +1238,7 @@ export const blockUnblock = async (req, res) => {
 export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: "No file provided",
-      });
+      return res.status(400).json(errorResponse(400, "Uploading image failed"));
     }
 
     const fileName = `images/${Date.now()}${path.extname(
@@ -1287,9 +1260,8 @@ export const uploadImage = async (req, res) => {
       url: s3Response.Location,
     });
   } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      message: "Internal server error",
-    });
+    res
+      .status(500)
+      .json(errorResponse(500, "Error uploading image", error.message));
   }
 };
